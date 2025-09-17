@@ -1,132 +1,91 @@
-* {
-    font-family: 'JetBrainsMono Nerd Font Propo', sans-serif;
-    font-size: 13px;
+/*.modules-right > widget:last-child does select the last element but the margin doesnt work on it for whatever reason, .modules-right:last-child select all the fking elements and idk why but it works*/
+/*Reason is probably conflict of the margin with the other elements*/
+/*Debugging this shit with background color change seems a good option*/
+/*Never wanna do web dev again, its just dark magic at this point*/
+
+*
+{
+    font-family: 'Monocraft';
+    font-size: 15px;
     font-weight: bold;
 }
 
-window#waybar {
-    background-color: rgba(43, 48, 59, 0.5);
-    border-bottom: 3px solid rgba(100, 114, 125, 0.5);
-    color: #ffffff;
-    transition-property: background-color;
-    transition-duration: .5s;
+window#waybar
+{
+	background-color: rgba(35, 35, 61, 0.85);
+
+	border-bottom: 6px solid rgba(15, 15, 30, 0.80);
+	border-right: 4px solid rgba(15, 15, 30, 0.80);
+
+	border-radius: 20px;
 }
 
-window#waybar.hidden {
-    opacity: 0.2;
+#workspaces label
+{
+	font-size: 20px;
 }
 
-/*
-window#waybar.empty {
-    background-color: transparent;
-}
-window#waybar.solo {
-    background-color: #FFFFFF;
-}
-*/
-
-window#waybar.termite {
-    background-color: #3F3F3F;
+#workspaces button
+{
+	color: rgb(255,255,255);
 }
 
-window#waybar.chromium {
-    background-color: #000000;
-    border: none;
+.modules-left
+{
+	margin-left: 10px;
+	margin-bottom: 5px;
 }
 
-button {
-    /* Use box-shadow instead of border so the text isn't offset */
-    box-shadow: inset 0 -3px transparent;
-    /* Avoid rounded borders under each button name */
-    border: none;
-    border-radius: 0;
+.modules-center, .modules-right
+{
+	margin-top: 8px;
+	margin-bottom: 12px;
 }
 
-/* https://github.com/Alexays/Waybar/wiki/FAQ#the-workspace-buttons-have-a-strange-hover-effect */
-/*button:hover {
-    background: inherit;
-    box-shadow: inset 0 -3px #ffffff;
-}*/
 
-/* you can set a style on hover for any module like this */
-/*#pulseaudio:hover {
-    background-color: #a37800;
-}*/
-
-#workspaces button {
-    padding: 0 5px;
-    background-color: transparent;
-    color: #ffffff;
+.modules-right
+{
+	margin-right: 10px;
 }
 
-#workspaces button:hover {
-    background: rgba(0, 0, 0, 0.2);
+label.module
+{
+	background-color: rgb(20,20,50);
+
+	padding-left: 10px;
+	padding-right: 10px;
+	
+	border-radius: 15px;
 }
 
-#workspaces button.focused {
-    background-color: #64727D;
-    box-shadow: inset 0 -3px #ffffff;
+#pulseaudio, #network, #battery
+{
+	padding-right: 18px;
 }
 
-#workspaces button.urgent {
-    background-color: #eb4d4b;
+#clock 
+{
+	color: rgb(5,220,220);
 }
 
-#mode {
-    background-color: #64727D;
-    box-shadow: inset 0 -3px #ffffff;
+#battery
+{
+	color: rgb(5,200,5);
 }
 
-#clock,
-#battery,
-#backlight,
-#network,
-#pulseaudio,
-
-#window,
-#workspaces {
-    margin: 0 4px;
+#backlight
+{
+	color: rgb(245,162,96);
 }
 
-/* If workspaces is the leftmost module, omit left margin */
-.modules-left > widget:first-child > #workspaces {
-    margin-left: 10px;
+#network {
+    color: #FFF;
 }
 
-/*Doesnt work idk why*/
-/* If workspaces is the rightmost module, omit right margin */
-.modules-right > :last-child > #workspaces {
-	margin-right: 100px;
-	background-color: #64727D;
-}
-
-/*#clock {
-    background-color: #64727D;
-}*/
-
-
-/*#battery {
-    margin-right: 10;
-}*/
-
-/*#backlight {
-    background-color: #90b1b1;
-}*/
-
-/*#network {
-    background-color: #2980b9;
-}
-
-#network.disconnected {
+/*#network.disconnected {
     background-color: #f53c3c;
 }*/
 
-/*#pulseaudio {
-    background-color: #f1c40f;
-    color: #000000;
+#pulseaudio, #pulsaudio.muted {
+    color: rgb(150, 100, 190);
 }
-
-#pulseaudio.muted {
-    background-color: #90b1b1;
-    color: #2a5c45;
-}*/

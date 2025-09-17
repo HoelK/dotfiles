@@ -1,5 +1,5 @@
 {
-    "height": 40,
+    "height": 50,
     "spacing": 10,
     "margin-top": 10,
     "margin-left": 10,
@@ -7,7 +7,7 @@
 
     "modules-left":
     [
-	"hyprland/workspaces"
+	    "hyprland/workspaces"
     ],
     "modules-center":
     [
@@ -16,23 +16,31 @@
     "modules-right":
     [
         "pulseaudio",
-        "battery",
+	"backlight",
         "network",
-        "backlight"
+        "battery"
     ],
 
     "hyprland/workspaces":
     {
-	"persistent-workspaces":
-	{
-		"*": 5
-	}
+	    "format":"{icon}",
+	    "format-icons":
+	    {
+		    "active": "",
+		    "default": ""
+	    },
+	    "persistent-workspaces":
+	    {
+		    "1":"",
+		    "2":"",
+		    "3":""
+	    }
     },
 
     "clock":
     {
-        "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>"
     },
+
     "network":
     {
         "format-wifi": "",
@@ -50,6 +58,11 @@
         },
         "on-click": "pavucontrol"
     },
+    "backlight":
+    {
+        "format": "{percent}% {icon}",
+        "format-icons": ["", "", "", "", ""]
+    },
     "battery":
     {
         "states":
@@ -58,11 +71,5 @@
         },
         "format": "{capacity}% {icon}",
         "format-icons": ["", "", "", "", ""]
-    },
-    "backlight":
-    {
-        "format": "{percent}% {icon}",
-        "format-icons": ["", "", "", "", ""]
     }
-
 }
