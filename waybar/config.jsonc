@@ -37,27 +37,28 @@
 	    }
     },
 
-    "clock":
-    {
-    },
+    "clock": { "tooltip": false },
 
     "network":
     {
+	"tooltip-format": "{essid}",
         "format-wifi": "",
-        "format-ethernet": "{ipaddr}/{cidr}",
-        "format-disconnected": "⚠"
+        "format-ethernet": "󰈁",
+        "format-disconnected": "󰖪"
     },
+
     "pulseaudio":
     {
+	"tooltip": false,
         "format": "{volume}% {icon}",
         "format-muted": " {format_source}",
         "format-icons":
 	{
             "headphone": "",
             "default": ["", "", ""]
-        },
-        "on-click": "pavucontrol"
+        }
     },
+
     "backlight":
     {
         "format": "{percent}% {icon}",
@@ -67,7 +68,9 @@
     {
         "states":
 	{
-            "good": 95
+            "good": 100,
+	    "warning": 30,
+	    "critical": 20
         },
         "format": "{capacity}% {icon}",
         "format-icons": ["", "", "", "", ""]
