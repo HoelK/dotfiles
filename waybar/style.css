@@ -20,15 +20,17 @@ window#waybar
 	border-radius: 20px;
 }
 
-#workspaces label
+button:hover
 {
-	font-size: 20px;
+	box-shadow: none;
+	text-shadow: none;
+	background: none;
+	transition: none;
+	border-color: transparent;
 }
 
-#workspaces button
-{
-	color: rgb(255,255,255);
-}
+#workspaces label { font-size: 20px; }
+#workspaces button { color: rgb(255,255,255); }
 
 .modules-left
 {
@@ -41,7 +43,6 @@ window#waybar
 	margin-top: 8px;
 	margin-bottom: 12px;
 }
-
 
 .modules-right
 {
@@ -58,34 +59,20 @@ label.module
 	border-radius: 15px;
 }
 
-#pulseaudio, #network, #battery
-{
-	padding-right: 18px;
-}
+#pulseaudio, #network, #battery { padding-right: 18px; }
+#clock { color: rgb(5,220,220); }
+#battery { color: rgb(5,200,5); }
+#battery.warning { color: #fcba03; }
+#battery.critical { color: #e00b0b }
+#backlight { color: rgb(245,162,96); }
+#network { color: #FFF; }
+#network.disconnected { color: #e00b0b }
 
-#clock 
-{
-	color: rgb(5,220,220);
-}
 
-#battery
-{
-	color: rgb(5,200,5);
-}
 
-#backlight
-{
-	color: rgb(245,162,96);
-}
-
-#network {
-    color: #FFF;
-}
 
 /*#network.disconnected {
     background-color: #f53c3c;
 }*/
 
-#pulseaudio, #pulsaudio.muted {
-    color: rgb(150, 100, 190);
-}
+#pulseaudio, #pulsaudio.muted { color: rgb(150, 100, 190); }
