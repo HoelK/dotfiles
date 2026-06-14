@@ -1,78 +1,64 @@
-/*.modules-right > widget:last-child does select the last element but the margin doesnt work on it for whatever reason, .modules-right:last-child select all the fking elements and idk why but it works*/
-/*Reason is probably conflict of the margin with the other elements*/
-/*Debugging this shit with background color change seems a good option*/
-/*Never wanna do web dev again, its just dark magic at this point*/
-
 *
 {
-    font-family: 'Monocraft';
-    font-size: 15px;
-    font-weight: bold;
+    font-family:		'Monocraft';
+    font-size:			15px;
+    font-weight:		bold;
 }
 
 window#waybar
 {
-	background-color: rgba(35, 35, 61, 0.85);
+	background-color:	rgba(35, 35, 61, 0.85);
 
-	border-bottom: 6px solid rgba(15, 15, 30, 0.80);
-	border-right: 4px solid rgba(15, 15, 30, 0.80);
-
-	border-radius: 20px;
+	border-bottom:		6px solid rgba(15, 15, 30, 0.80);
+	border-right:		4px solid rgba(15, 15, 30, 0.80);
+	border-radius:		20px;
 }
 
 button:hover
 {
-	box-shadow: none;
-	text-shadow: none;
-	background: none;
-	transition: none;
-	border-color: transparent;
+	box-shadow:			none;
+	text-shadow:		none;
+	background:			none;
+	transition:			none;
+	border-color:		transparent;
 }
 
-#workspaces label { font-size: 20px; }
-#workspaces button { color: rgb(255,255,255); }
+#workspaces label		{ font-size: 20px; }
+#workspaces button		{ color: rgb(255,255,255); }
 
 .modules-left
 {
-	margin-left: 10px;
-	margin-bottom: 5px;
+	margin-left:		10px;
+	margin-bottom:		5px;
 }
 
 .modules-center, .modules-right
 {
-	margin-top: 8px;
-	margin-bottom: 12px;
+	margin-top:			8px;
+	margin-bottom:		12px;
 }
 
 .modules-right
 {
-	margin-right: 10px;
+	margin-right:		10px;
 }
 
 label.module
 {
-	background-color: rgb(20,20,50);
+	background-color:	rgb(20,20,50);
 
-	padding-left: 10px;
-	padding-right: 10px;
+	padding-left:		10px;
+	padding-right:		10px;
 	
-	border-radius: 15px;
+	border-radius:		15px;
 }
 
-#pulseaudio, #network, #battery { padding-right: 18px; }
-#clock { color: rgb(5,220,220); }
-#battery { color: rgb(5,200,5); }
-#battery.warning { color: #fcba03; }
-#battery.critical { color: #e00b0b }
-#backlight { color: rgb(245,162,96); }
-#network { color: #FFF; }
-#network.disconnected { color: #e00b0b }
-
-
-
-
-/*#network.disconnected {
-    background-color: #f53c3c;
-}*/
-
-#pulseaudio, #pulsaudio.muted { color: rgb(150, 100, 190); }
+#pulseaudio, #network, #battery	{ padding-right: 18px; }
+#clock							{ color: rgb(5,220,220); }
+#battery						{ color: rgb(5,200,5); }
+#battery.warning				{ color: #fcba03; }
+#battery.critical				{ color: #e00b0b }
+#backlight						{ color: rgb(245,162,96); }
+#network						{ color: #FFF; }
+#network.disconnected			{ color: #e00b0b }
+#pulseaudio, #pulsaudio.muted	{ color: rgb(150, 100, 190); }

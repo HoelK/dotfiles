@@ -1,9 +1,9 @@
 {
-    "height": 50,
-    "spacing": 10,
-    "margin-top": 10,
-    "margin-left": 10,
-    "margin-right": 10,
+    "height":		50,
+    "spacing":		10,
+    "margin-top":	10,
+    "margin-left":	10,
+    "margin-right":	10,
 
     "modules-left":
     [
@@ -16,18 +16,18 @@
     "modules-right":
     [
         "pulseaudio",
-	"backlight",
+		"backlight",
         "network",
         "battery"
     ],
 
     "hyprland/workspaces":
     {
-	    "format":"{icon}",
+	    "format":		"{icon}",
 	    "format-icons":
 	    {
-		    "active": "",
-		    "default": ""
+		    "active":	"",
+		    "default":	""
 	    },
 	    "persistent-workspaces":
 	    {
@@ -41,38 +41,38 @@
 
     "network":
     {
-	"tooltip-format": "{essid}",
-        "format-wifi": "",
-        "format-ethernet": "󰈁",
-        "format-disconnected": "󰖪"
+		"tooltip-format":		"{essid}",
+        "format-wifi":			"",
+        "format-ethernet":		"󰈁",
+        "format-disconnected":	"󰖪"
     },
 
     "pulseaudio":
     {
-	"tooltip": false,
-        "format": "{volume}% {icon}",
-        "format-muted": " {format_source}",
+		"tooltip":			false,
+        "format":			"{volume}% {icon}",
+        "format-muted":		" {format_source}",
         "format-icons":
-	{
-            "headphone": "",
-            "default": ["", "", ""]
+		{
+            "headphone":	"",
+            "default":		["", "", ""]
         }
     },
 
     "backlight":
     {
-        "format": "{percent}% {icon}",
-        "format-icons": ["", "", "", "", ""]
+        "format":		"{percent}% {icon}",
+        "format-icons":	["", "", "", "", ""]
     },
     "battery":
     {
         "states":
-	{
-            "good": 100,
-	    "warning": 30,
-	    "critical": 20
+		{
+            "good":		100,
+	    	"warning":	30,
+	    	"critical":	20
         },
-        "format": "{capacity}% {icon}",
-        "format-icons": ["", "", "", "", ""]
+        "format":		"{capacity}% {icon}",
+        "format-icons":	["", "", "", "", ""]
     }
 }
