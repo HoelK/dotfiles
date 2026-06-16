@@ -22,10 +22,10 @@ alias unpack="tar -xvzf"
 alias c3="~/c3/c3c compile"
 
 ##Envs
-export PATH=$PATH:/home/Keos/.venv/bin
-. "$HOME/.local/bin/env"
+export PATH=$PATH:$HOME/.venv/bin
+source "$HOME/.local/bin/env"
 
-##Keymaps
+##keymaps
 bindkey '^[[1;5D' backward-word
 bindkey '^[[1;5C' forward-word
 bindkey '^H' backward-kill-word
