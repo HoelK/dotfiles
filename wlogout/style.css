@@ -1,0 +1,54 @@
+* {
+	background-image:	none;
+	box-shadow:			none;
+}
+
+window { background-color: rgba(0, 0, 0, 0.0); }
+
+button {
+	/* General */
+	color:					rgba(200, 0, 0, 1.0);
+	min-width:				100px;
+	margin:					15px;
+
+	/* Button Background (Icons and Color) */
+	background-size:		auto;
+	background-repeat:		no-repeat;
+	background-position:	center;
+	background-color:		rgba(0, 0, 250, 1.0);
+
+	/* Border */
+	border-radius:			100px;
+	border-style:			solid;
+	border-width:			0px;
+	background-color:		rgba(200, 200, 200, 0.05);
+
+	/* Zoom */
+	transition:				all 200ms ease-out;
+
+}
+
+button:focus, button:active {
+	/* Colors */
+	color:					rgba(0, 200, 255, 1.0);
+	background-color:		rgba(0, 200, 255, 0.08);
+	border-color:			rgba(0, 200, 255, 1);
+	border-width:			2px;
+
+	/* Halo */
+	box-shadow:				0 0 6px  rgba(0, 200, 255, 0.3),        /* tight halo */
+							inset 0 0 12px rgba(0, 200, 255, 0.3);  /* glow inside the ring */
+
+	/* Zoom */
+	margin:					5px;
+	min-width:				120px;
+}
+
+#lock			{ background-image: url("/home/Keos/.config/wlogout/assets/lock.svg"); }
+#lock:focus		{ background-image: url("/home/Keos/.config/wlogout/assets/lock-focus.svg"); }
+
+#reboot			{ background-image: url("/home/Keos/.config/wlogout/assets/reboot.svg"); }
+#reboot:focus	{ background-image: url("/home/Keos/.config/wlogout/assets/reboot-focus.svg"); }
+
+#shutdown		{ background-image: url("/home/Keos/.config/wlogout/assets/shutdown.svg"); }
+#shutdown:focus	{ background-image: url("/home/Keos/.config/wlogout/assets/shutdown-focus.svg"); }
