@@ -44,11 +44,11 @@ button:focus, button:active {
 	min-width:				120px;
 }
 
-#lock			{ background-image: url("/home/Keos/.config/wlogout/assets/lock.svg"); }
-#lock:focus		{ background-image: url("/home/Keos/.config/wlogout/assets/lock-focus.svg"); }
+#lock			{ background-image: url("assets/lock.svg"); }
+#lock:focus		{ background-image: url("assets/lock-focus.svg"); }
 
-#reboot			{ background-image: url("/home/Keos/.config/wlogout/assets/reboot.svg"); }
-#reboot:focus	{ background-image: url("/home/Keos/.config/wlogout/assets/reboot-focus.svg"); }
+#reboot			{ background-image: url("assets/reboot.svg"); }
+#reboot:focus	{ background-image: url("assets/reboot-focus.svg"); }
 
-#shutdown		{ background-image: url("/home/Keos/.config/wlogout/assets/shutdown.svg"); }
-#shutdown:focus	{ background-image: url("/home/Keos/.config/wlogout/assets/shutdown-focus.svg"); }
+#shutdown		{ background-image: url("assets/shutdown.svg"); }
+#shutdown:focus	{ background-image: url("assets/shutdown-focus.svg"); }
