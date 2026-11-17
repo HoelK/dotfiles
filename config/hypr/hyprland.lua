@@ -5,14 +5,20 @@
 ------------------
 
 -- See https://wiki.hypr.land/configuring/core/monitors/
-
--- Most laptops
 hl.monitor({
     output		= "eDP-1",
     mode		= "1920x1080@60",
     position	= "0x0",
     scale		= 1,
 })
+
+hl.monitor({
+    output		= "DP-1",
+    mode		= "2560x1440@360",
+    position	= "0x0",
+    scale		= 1,
+})
+
 
 -- Default mirror fallback
 hl.monitor({
@@ -34,6 +40,8 @@ local WPengine		= "hyprpaper"
 local lockscreen	= "hyprlock"
 local screenshot	= "hyprshot -m region"
 local logmenu		= "wlogout -b 3 -c 20 -T 400 -B 300 -L 300 -R 400"
+local passmng		= "keepassxc"
+local applauncher	= "fuzzel"
 
 -------------------
 ---- AUTOSTART ----
@@ -147,6 +155,7 @@ hl.config({ scrolling = { fullscreen_on_one_column = true, }, })
 
 hl.config({ misc = {
 	disable_hyprland_logo = true,
+	middle_click_paste = false,
 }})
 
 ---------------
@@ -170,6 +179,12 @@ hl.config({
     },
 })
 
+
+hl.device({
+    name    = "mediatek-inc-razer-blackshark-v2-hs-2.4",
+    enabled = false,
+})
+
 ---------------------
 ---- KEYBINDINGS ----
 ---------------------
@@ -182,6 +197,9 @@ hl.bind(mainMod .. " + Q", hl.dsp.exec_cmd(terminal))
 hl.bind(mainMod .. " + L", hl.dsp.exec_cmd(lockscreen))
 hl.bind(mainMod .. " + W", hl.dsp.exec_cmd(browser))
 hl.bind(mainMod .. " + Escape", hl.dsp.exec_cmd(logmenu))
+hl.bind(mainMod .. " + P", hl.dsp.exec_cmd(passmng))
+hl.bind(mainMod .. " + A", hl.dsp.exec_cmd(applauncher))
+hl.bind(mainMod .. " + S", hl.dsp.exec_cmd("steam"))
 hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'"))
 hl.bind("F10", hl.dsp.exec_cmd(screenshot))
 
@@ -197,6 +215,10 @@ for i = 1, 10 do
     hl.bind(mainMod .. " + SHIFT + " .. key,     hl.dsp.window.move({ workspace = i }))
 end
 
+-- Audio
+hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 2.5%-"), { locked = true, repeating = true })
+hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 2.5%+"), { locked = true, repeating = true })
+hl.bind("XF86AudioPlay",  hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
 
 ----------------------
 ---- WINDOW RULES ----
@@ -215,3 +237,4 @@ hl.window_rule({
 ---------------------
 
 hl.layer_rule({ match = { namespace = "logout_dialog" }, blur = true })
+hl.layer_rule({ match = { namespace = "launcher" }, blur = true })
