@@ -2,6 +2,7 @@
 ## pp
 
 [Lock pp](climber-pplock.png) from the manga The Climber [Wikipedia](https://en.wikipedia.org/wiki/The_Climber_(manga))
+[Lock pp](arar-pplock.png) from NuclearBanan [X](https://x.com/NuclearBanan/status/2113675484387226072?s=20)
 
 ## Wallpapers
 
