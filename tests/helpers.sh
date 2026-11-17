@@ -80,6 +80,56 @@ assert_no_broken_links() {
 	[[ -z "${broken}" ]] || fail "broken symlinks: ${broken}"
 }
 
+#####################
+###### FIREFOX ######
+#####################
+
+# Fake Firefox profiles: Firefox isn't installed in the container,
+# install.sh only needs profiles.ini and the profile folder.
+FF_PROFILE="abcd1234.default-release"	# the one Firefox really uses
+FF_DECOY="zzzz9999.default"			# listed first, as Profile0 with Default=1
+
+# $1 Firefox dir (e.g. ~/.mozilla/firefox)
+# Creates the real profile and a decoy one. Only the [Install...] section
+# says which profile Firefox opens: picking Profile0 or Default=1 is wrong.
+make_ff_profile() {
+	local ff_dir="$1"
+	mkdir -p "${ff_dir}/${FF_DECOY}" "${ff_dir}/${FF_PROFILE}"
+	echo 'user_pref("browser.startup.page", 3);' > "${ff_dir}/${FF_PROFILE}/prefs.js"
+	cat > "${ff_dir}/profiles.ini" <<-EOF
+		[Profile0]
+		Name=default
+		IsRelative=1
+		Path=${FF_DECOY}
+		Default=1
+
+		[Profile1]
+		Name=default-release
+		IsRelative=1
+		Path=${FF_PROFILE}
+
+		[General]
+		StartWithLastProfile=1
+		Version=2
+
+		[Install4F96D1932A9F858E]
+		Default=${FF_PROFILE}
+		Locked=1
+	EOF
+}
+
+# $1 profile folder: user.js and chrome/ must be there and identical to the repo
+assert_ff_installed() {
+	diff "${REPO}/firefox/user.js" "$1/user.js" || fail "$1/user.js differs from the repo"
+	diff -r "${REPO}/firefox/chrome" "$1/chrome" || fail "$1/chrome differs from the repo"
+}
+
+# $1 profile folder: nothing from the rice must be there
+assert_ff_not_installed() {
+	[[ ! -e "$1/user.js" ]] || fail "$1/user.js exists, it should not"
+	[[ ! -e "$1/chrome" ]] || fail "$1/chrome exists, it should not"
+}
+
 # Simulate a user who already has their own config
 make_old_config() {
 	mkdir -p "${HOME}/.config/hypr"

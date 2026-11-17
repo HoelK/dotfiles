@@ -123,14 +123,19 @@ function run_and_log {
 
 
 #$1 path of dir to backup
+#$2 its version in the repo	(default: same name at the repo root)
+#$3 where to back it up		(default: the backup folder)
 function backup {
-	if diff -rq "${repo_dir}/$(basename "${1}")" "${1}" >/dev/null 2>&1; then
+	local repo_path="${2:-${repo_dir}/$(basename "${1}")}"
+	local dest="${3:-${backup_dir}}"
+
+	if diff -rq "${repo_path}" "${1}" >/dev/null 2>&1; then
 		rm -rf "${1:?}"
 		echo "${INFO} ${1} is already the rice, not backed up"
 		return 0
 	fi
 
-	if mv "${1}" "${backup_dir}"; then
+	if mkdir -p "${dest}" && mv "${1}" "${dest}"; then
 		echo "${SUCCESS} Backed up ${1}"
 		return 0
 	else
@@ -139,8 +144,12 @@ function backup {
 	fi
 }
 
+#$1 path to remove
+#$2 its version in the repo	(default: same name at the repo root)
 function remove_if_rice {
-	if [[ -e "${1}" ]] && ! diff -rq "${repo_dir}/$(basename "${1}")" "${1}" >/dev/null 2>&1; then
+	local repo_path="${2:-${repo_dir}/$(basename "${1}")}"
+
+	if [[ -e "${1}" ]] && ! diff -rq "${repo_path}" "${1}" >/dev/null 2>&1; then
 		echo "${INFO} ${1} is not the rice, left untouched"
 		return 1
 	fi
@@ -154,6 +163,7 @@ function remove_all {
 	done
 	remove_if_rice "${HOME}/.zshrc"
 	remove_if_rice "${share}wallpapers"
+	ff_uninstall	# no backup folder here, so it only removes
 }
 
 #######################
@@ -212,6 +222,78 @@ function zsh_uninstall {
 }
 
 
+#####################
+###### FIREFOX ######
+#####################
+
+FF_FILES=(
+	"user.js"
+	"chrome"
+)
+
+# Prints the folder of the profile Firefox opens, fails if there is none.
+# Firefox keeps using ~/.mozilla if it exists, new installs use ~/.config/mozilla.
+function ff_find_profile {
+	local dir ff_dir="" profile
+
+	for dir in "${HOME}/.mozilla/firefox" "${XDG_CONFIG_HOME:-${HOME}/.config}/mozilla/firefox"; do
+		if [[ -f "${dir}/profiles.ini" ]]; then
+			ff_dir="${dir}"
+			break
+		fi
+	done
+	[[ -n "${ff_dir}" ]] || return 1
+
+	# The [Install...] section names the profile Firefox opens
+	# (not Profile0, not the one with Default=1)
+	profile=$(awk -F= '
+		/^\[Install/			{ inst=1; next }
+		/^\[/					{ inst=0 }
+		inst && $1=="Default"	{ print $2; exit }
+	' "${ff_dir}/profiles.ini")
+	[[ -n "${profile}" ]] || return 1
+
+	# Path is relative to the Firefox dir, unless it's absolute (IsRelative=0)
+	[[ "${profile}" == /* ]] || profile="${ff_dir}/${profile}"
+	[[ -d "${profile}" ]] || return 1
+	echo "${profile}"
+}
+
+function ff_install {
+	local profile file
+
+	if ! profile=$(ff_find_profile); then
+		echo "${INFO} No Firefox profile found (launch Firefox once and re-run), Firefox skipped"
+		return 0
+	fi
+	echo "${INFO} Firefox profile found at ${profile}"
+
+	for file in "${FF_FILES[@]}"; do
+		if [[ -e "${profile}/${file}" ]] &&
+			! backup "${profile}/${file}" "${repo_dir}/firefox/${file}" "${backup_dir}firefox/"; then
+			continue
+		fi
+		run_and_log "Installing ${repo_dir}/firefox/${file} to ${profile}" cp -r "${repo_dir}/firefox/${file}" "${profile}/"
+	done
+}
+
+function ff_uninstall {
+	local profile file
+
+	profile=$(ff_find_profile) || return 0
+
+	for file in "${FF_FILES[@]}"; do
+		if remove_if_rice "${profile}/${file}" "${repo_dir}/firefox/${file}" &&
+			[[ -e "${backup_dir}firefox/${file}" ]]; then
+			run_and_log "Restoring ${backup_dir}firefox/${file} to ${profile}" mv "${backup_dir}firefox/${file}" "${profile}/"
+		fi
+	done
+	# Leave no empty folder behind, so the backup can be cleaned up
+	if [[ -d "${backup_dir}firefox" ]]; then
+		rmdir --ignore-fail-on-non-empty "${backup_dir}firefox"
+	fi
+}
+
 ######################
 ##### WALLPAPERS #####
 ######################
@@ -241,14 +323,16 @@ init
 if [[ ${uninstalling} == true ]]; then
 	setup_backup_uninstall
 	dirs_uninstall
-	zsh_uninstall 
+	zsh_uninstall
 	wallpaper_uninstall
+	ff_uninstall
 	echo "${INFO} The old config folders have been moved from ${backup_dir} to ${config_dir}"
 else
 	setup_backup_install
 	dirs_install
 	zsh_install
 	wallpaper_install
+	ff_install
 	echo "${INFO} The new config folders have been moved to ${config_dir}"
 
 fi

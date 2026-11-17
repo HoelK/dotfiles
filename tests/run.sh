@@ -219,6 +219,114 @@ add_case "no broken symlinks after install" '
 	assert_no_broken_links
 '
 
+#####################
+###### FIREFOX ######
+#####################
+
+# Skip the Firefox cases until install.sh actually calls the functions
+FF_INSTALL_GUARD='grep -qE "^[[:space:]]*ff_install[[:space:]]*$" "$REPO/install.sh" || { echo "ff_install not called yet"; exit 77; }
+'
+FF_UNINSTALL_GUARD='grep -qE "^[[:space:]]*ff_uninstall[[:space:]]*$" "$REPO/install.sh" || { echo "ff_uninstall not called yet"; exit 77; }
+'
+
+add_case "firefox: no profile, install skips it without failing" "$FF_INSTALL_GUARD"'
+	install	# fails if install.sh logged a FAIL line
+	[[ ! -e "$HOME/.mozilla" ]] || fail "~/.mozilla was created, Firefox was never launched"
+	[[ ! -e "$HOME/.config/mozilla" ]] || fail "~/.config/mozilla was created, Firefox was never launched"
+'
+
+add_case "firefox: installs into the profile in ~/.mozilla" "$FF_INSTALL_GUARD"'
+	ff="$HOME/.mozilla/firefox"
+	make_ff_profile "$ff"
+	install
+	assert_ff_installed "$ff/$FF_PROFILE"
+	assert_ff_not_installed "$ff/$FF_DECOY"	# Profile0 / Default=1 is not the one Firefox uses
+	grep -qs browser.startup.page "$ff/$FF_PROFILE/prefs.js" || fail "prefs.js was modified or removed"
+'
+
+add_case "firefox: installs into the profile in ~/.config/mozilla" "$FF_INSTALL_GUARD"'
+	ff="$HOME/.config/mozilla/firefox"
+	make_ff_profile "$ff"
+	install
+	assert_ff_installed "$ff/$FF_PROFILE"
+	assert_ff_not_installed "$ff/$FF_DECOY"
+'
+
+add_case "firefox: uses ~/.mozilla when both locations exist" "$FF_INSTALL_GUARD"'
+	make_ff_profile "$HOME/.mozilla/firefox"
+	make_ff_profile "$HOME/.config/mozilla/firefox"
+	install
+	assert_ff_installed "$HOME/.mozilla/firefox/$FF_PROFILE"	# Firefox keeps using the old location if it exists
+	assert_ff_not_installed "$HOME/.config/mozilla/firefox/$FF_PROFILE"
+'
+
+add_case "firefox: follows XDG_CONFIG_HOME" "$FF_INSTALL_GUARD"'
+	export XDG_CONFIG_HOME="$HOME/xdg"
+	ff="$XDG_CONFIG_HOME/mozilla/firefox"
+	make_ff_profile "$ff"
+	install
+	assert_ff_installed "$ff/$FF_PROFILE"
+'
+
+add_case "firefox: absolute profile path (IsRelative=0)" "$FF_INSTALL_GUARD"'
+	# Profile outside the Firefox dir, referenced by its full path
+	ff="$HOME/.mozilla/firefox"
+	elsewhere="$HOME/my-profiles/custom"
+	mkdir -p "$ff" "$elsewhere"
+	printf "%s\n" "[Profile0]" "Name=custom" "IsRelative=0" "Path=$elsewhere" "Default=1" "" \
+		"[Install4F96D1932A9F858E]" "Default=$elsewhere" "Locked=1" > "$ff/profiles.ini"
+	install
+	assert_ff_installed "$elsewhere"
+	[[ ! -e "$ff$elsewhere" ]] || fail "absolute path was glued to the Firefox dir: $ff$elsewhere"
+'
+
+add_case "firefox: running twice is safe" "$FF_INSTALL_GUARD"'
+	ff="$HOME/.mozilla/firefox"
+	make_ff_profile "$ff"
+	install
+	install
+	assert_ff_installed "$ff/$FF_PROFILE"	# cp -r into an existing chrome/ nests it: chrome/chrome
+'
+
+add_case "firefox: existing user.js and chrome are backed up" "$FF_INSTALL_GUARD"'
+	p="$HOME/.mozilla/firefox/$FF_PROFILE"
+	make_ff_profile "$HOME/.mozilla/firefox"
+	echo "// OLD_USERJS" > "$p/user.js"
+	mkdir "$p/chrome"
+	echo "/* OLD_CHROME */" > "$p/chrome/userChrome.css"
+	echo "/* OLD_EXTRA */" > "$p/chrome/only-in-old.css"
+	install
+	assert_backed_up OLD_USERJS
+	assert_backed_up OLD_CHROME
+	assert_backed_up OLD_EXTRA
+	assert_ff_installed "$p"	# also fails if only-in-old.css was left mixed with the rice
+'
+
+add_case "firefox: uninstall restores the old user.js and chrome" "$FF_INSTALL_GUARD$FF_UNINSTALL_GUARD"'
+	p="$HOME/.mozilla/firefox/$FF_PROFILE"
+	make_ff_profile "$HOME/.mozilla/firefox"
+	echo "// OLD_USERJS" > "$p/user.js"
+	mkdir "$p/chrome"
+	echo "/* OLD_CHROME */" > "$p/chrome/userChrome.css"
+	install
+	install --uninstall
+	grep -qs OLD_USERJS "$p/user.js" || fail "old user.js not restored"
+	grep -qs OLD_CHROME "$p/chrome/userChrome.css" || fail "old chrome/userChrome.css not restored"
+	[[ ! -e "$p/chrome/chrome" ]] || fail "backup restored INSIDE chrome/: chrome/chrome"
+	leftover=$(find "$HOME/.config/$BACKUP_DIR" -mindepth 1 2>/dev/null)
+	[[ -z "$leftover" ]] || fail "backup folder not cleaned up after restoring everything: $leftover"
+'
+
+add_case "firefox: uninstall after a fresh install removes only the rice" "$FF_INSTALL_GUARD$FF_UNINSTALL_GUARD"'
+	p="$HOME/.mozilla/firefox/$FF_PROFILE"
+	make_ff_profile "$HOME/.mozilla/firefox"
+	install
+	install --uninstall
+	assert_ff_not_installed "$p"
+	grep -qs browser.startup.page "$p/prefs.js" || fail "uninstall touched prefs.js"
+	[[ -f "$HOME/.mozilla/firefox/profiles.ini" ]] || fail "uninstall removed profiles.ini"
+'
+
 ################
 ##### MAIN #####
 ################
