@@ -76,7 +76,7 @@ CASE_CODES=()
 add_case() { CASE_NAMES+=("$1"); CASE_CODES+=("$2"); }
 
 add_case "script has no syntax error" '
-	bash -n "$REPO/install.sh" || fail "bash -n reports a syntax error"
+	bash -n "$REPO/scripts/install.sh" || fail "bash -n reports a syntax error"
 '
 
 add_case "fresh install" '
@@ -125,7 +125,7 @@ add_case "each run gets its own backup folder" '
 '
 
 add_case "uninstall restores the old config" '
-	grep -q -- "--uninstall" "$REPO/install.sh" || { echo "--uninstall not implemented yet"; exit 77; }
+	grep -q -- "--uninstall" "$REPO/scripts/install.sh" || { echo "--uninstall not implemented yet"; exit 77; }
 	make_old_config
 	install
 	install --uninstall
@@ -135,7 +135,7 @@ add_case "uninstall restores the old config" '
 '
 
 add_case "uninstall after a fresh install removes the rice" '
-	grep -q -- "--uninstall" "$REPO/install.sh" || { echo "--uninstall not implemented yet"; exit 77; }
+	grep -q -- "--uninstall" "$REPO/scripts/install.sh" || { echo "--uninstall not implemented yet"; exit 77; }
 	install
 	install --uninstall
 	for dir in "${DIRECTORIES[@]}"; do
@@ -146,7 +146,7 @@ add_case "uninstall after a fresh install removes the rice" '
 '
 
 add_case "install twice, uninstall restores the original config" '
-	grep -q -- "--uninstall" "$REPO/install.sh" || { echo "--uninstall not implemented yet"; exit 77; }
+	grep -q -- "--uninstall" "$REPO/scripts/install.sh" || { echo "--uninstall not implemented yet"; exit 77; }
 	make_old_config
 	install
 	install
@@ -156,7 +156,7 @@ add_case "install twice, uninstall restores the original config" '
 '
 
 add_case "existing wallpapers are backed up and restored" '
-	grep -q -- "--uninstall" "$REPO/install.sh" || { echo "--uninstall not implemented yet"; exit 77; }
+	grep -q -- "--uninstall" "$REPO/scripts/install.sh" || { echo "--uninstall not implemented yet"; exit 77; }
 	mkdir -p "$HOME/$WALLPAPERS_DIR"
 	echo MY_WALLPAPER > "$HOME/$WALLPAPERS_DIR/mine.png"
 	install
@@ -168,7 +168,7 @@ add_case "existing wallpapers are backed up and restored" '
 '
 
 add_case "uninstall twice keeps the user config" '
-	grep -q -- "--uninstall" "$REPO/install.sh" || { echo "--uninstall not implemented yet"; exit 77; }
+	grep -q -- "--uninstall" "$REPO/scripts/install.sh" || { echo "--uninstall not implemented yet"; exit 77; }
 	make_old_config
 	install
 	install --uninstall
@@ -178,7 +178,7 @@ add_case "uninstall twice keeps the user config" '
 '
 
 add_case "uninstall without install keeps the user config" '
-	grep -q -- "--uninstall" "$REPO/install.sh" || { echo "--uninstall not implemented yet"; exit 77; }
+	grep -q -- "--uninstall" "$REPO/scripts/install.sh" || { echo "--uninstall not implemented yet"; exit 77; }
 	make_old_config
 	install --uninstall	# rice was never installed
 	grep -qs OLD_HYPR "$HOME/.config/hypr/hyprland.conf" || fail "user hyprland.conf deleted"
@@ -186,7 +186,7 @@ add_case "uninstall without install keeps the user config" '
 '
 
 add_case "uninstall after editing the rice loses nothing" '
-	grep -q -- "--uninstall" "$REPO/install.sh" || { echo "--uninstall not implemented yet"; exit 77; }
+	grep -q -- "--uninstall" "$REPO/scripts/install.sh" || { echo "--uninstall not implemented yet"; exit 77; }
 	make_old_config
 	install
 	echo "# my tweak" >> "$HOME/.config/hypr/hyprland.conf"	# user edits the installed rice
@@ -224,9 +224,9 @@ add_case "no broken symlinks after install" '
 #####################
 
 # Skip the Firefox cases until install.sh actually calls the functions
-FF_INSTALL_GUARD='grep -qE "^[[:space:]]*ff_install[[:space:]]*$" "$REPO/install.sh" || { echo "ff_install not called yet"; exit 77; }
+FF_INSTALL_GUARD='grep -qE "^[[:space:]]*ff_install[[:space:]]*$" "$REPO/scripts/install.sh" || { echo "ff_install not called yet"; exit 77; }
 '
-FF_UNINSTALL_GUARD='grep -qE "^[[:space:]]*ff_uninstall[[:space:]]*$" "$REPO/install.sh" || { echo "ff_uninstall not called yet"; exit 77; }
+FF_UNINSTALL_GUARD='grep -qE "^[[:space:]]*ff_uninstall[[:space:]]*$" "$REPO/scripts/install.sh" || { echo "ff_uninstall not called yet"; exit 77; }
 '
 
 add_case "firefox: no profile, install skips it without failing" "$FF_INSTALL_GUARD"'

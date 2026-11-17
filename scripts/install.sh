@@ -42,7 +42,8 @@ FILES=(
 : ${HOME:?HOME env required}
 config_dir="${HOME}/.config/"
 backup_dir="${config_dir}config-back/"
-repo_dir="$(dirname "$(realpath "$0")")"
+repo_dir="$(dirname "$(dirname "$(realpath "$0")")")"
+rice_dir="${repo_dir}/config"
 share="${HOME}/.local/share/"
 
 #############################
@@ -61,7 +62,7 @@ function init {
 
 	# Creating backup
 	if ! [[ -d "${backup_dir}" ]]; then
-		mkdir "${backup_dir}" || {
+		mkdir -p "${backup_dir}" || {
 			echo "${FAIL} Couldn't create ${backup_dir}."
 			echo "Aborting..."
 			exit 1
@@ -123,10 +124,10 @@ function run_and_log {
 
 
 #$1 path of dir to backup
-#$2 its version in the repo	(default: same name at the repo root)
+#$2 its version in the repo	(default: same name in config/)
 #$3 where to back it up		(default: the backup folder)
 function backup {
-	local repo_path="${2:-${repo_dir}/$(basename "${1}")}"
+	local repo_path="${2:-${rice_dir}/$(basename "${1}")}"
 	local dest="${3:-${backup_dir}}"
 
 	if diff -rq "${repo_path}" "${1}" >/dev/null 2>&1; then
@@ -145,9 +146,9 @@ function backup {
 }
 
 #$1 path to remove
-#$2 its version in the repo	(default: same name at the repo root)
+#$2 its version in the repo	(default: same name in config/)
 function remove_if_rice {
-	local repo_path="${2:-${repo_dir}/$(basename "${1}")}"
+	local repo_path="${2:-${rice_dir}/$(basename "${1}")}"
 
 	if [[ -e "${1}" ]] && ! diff -rq "${repo_path}" "${1}" >/dev/null 2>&1; then
 		echo "${INFO} ${1} is not the rice, left untouched"
@@ -162,7 +163,7 @@ function remove_all {
 		remove_if_rice "${config_dir}${dir}"
 	done
 	remove_if_rice "${HOME}/.zshrc"
-	remove_if_rice "${share}wallpapers"
+	remove_if_rice "${share}wallpapers" "${repo_dir}/wallpapers"
 	ff_uninstall	# no backup folder here, so it only removes
 }
 
@@ -174,7 +175,7 @@ function dirs_install {
 	local dir
 	for dir in "${DIRECTORIES[@]}"; do
 		local path_under_conf="${config_dir}${dir}"
-		local path_under_repo="${repo_dir}/${dir}"
+		local path_under_repo="${rice_dir}/${dir}"
 
 		if [[ -d "${path_under_conf}" ]] &&
 			! backup "${path_under_conf}"; then
@@ -203,7 +204,7 @@ function dirs_uninstall {
 ##################
 
 function zsh_install {
-	local new_zsh="${repo_dir}/.zshrc"
+	local new_zsh="${rice_dir}/.zshrc"
 	local old_zsh="${HOME}/.zshrc"
 
 	if [[ -f "${old_zsh}" ]] && ! backup "${old_zsh}"; then
@@ -270,10 +271,10 @@ function ff_install {
 
 	for file in "${FF_FILES[@]}"; do
 		if [[ -e "${profile}/${file}" ]] &&
-			! backup "${profile}/${file}" "${repo_dir}/firefox/${file}" "${backup_dir}firefox/"; then
+			! backup "${profile}/${file}" "${rice_dir}/firefox/${file}" "${backup_dir}firefox/"; then
 			continue
 		fi
-		run_and_log "Installing ${repo_dir}/firefox/${file} to ${profile}" cp -r "${repo_dir}/firefox/${file}" "${profile}/"
+		run_and_log "Installing ${rice_dir}/firefox/${file} to ${profile}" cp -r "${rice_dir}/firefox/${file}" "${profile}/"
 	done
 }
 
@@ -283,7 +284,7 @@ function ff_uninstall {
 	profile=$(ff_find_profile) || return 0
 
 	for file in "${FF_FILES[@]}"; do
-		if remove_if_rice "${profile}/${file}" "${repo_dir}/firefox/${file}" &&
+		if remove_if_rice "${profile}/${file}" "${rice_dir}/firefox/${file}" &&
 			[[ -e "${backup_dir}firefox/${file}" ]]; then
 			run_and_log "Restoring ${backup_dir}firefox/${file} to ${profile}" mv "${backup_dir}firefox/${file}" "${profile}/"
 		fi
@@ -300,7 +301,7 @@ function ff_uninstall {
 
 function wallpaper_install {
 	if [[ -d "${share}wallpapers" ]] &&
-		! backup "${share}wallpapers"; then
+		! backup "${share}wallpapers" "${repo_dir}/wallpapers"; then
 		return 1
 	fi
 
@@ -308,7 +309,7 @@ function wallpaper_install {
 }
 
 function wallpaper_uninstall {
-	if remove_if_rice "${share}wallpapers" &&
+	if remove_if_rice "${share}wallpapers" "${repo_dir}/wallpapers" &&
 		[[ -d "${backup_dir}wallpapers" ]]; then
 		run_and_log "Restoring ${backup_dir}/wallpapers to ${share}" mv "${backup_dir}/wallpapers" "${share}"
 	fi

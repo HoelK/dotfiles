@@ -14,7 +14,7 @@ fail() {
 # inside it printed an error (mv: cannot..., command not found...).
 install() {
 	local output status
-	output=$(cd / && "${REPO}/install.sh" "$@" 2>&1)
+	output=$(cd / && "${REPO}/scripts/install.sh" "$@" 2>&1)
 	status=$?
 	echo "${output}"
 	(( status == 0 )) || fail "install.sh $* exited with code ${status}"
@@ -33,10 +33,10 @@ install() {
 assert_installed() {
 	local dir file
 	for dir in "${DIRECTORIES[@]}"; do
-		diff -r "${REPO}/${dir}" "${HOME}/.config/${dir}" || fail "~/.config/${dir} differs from the repo"
+		diff -r "${REPO}/config/${dir}" "${HOME}/.config/${dir}" || fail "~/.config/${dir} differs from the repo"
 	done
 	for file in "${FILES[@]}"; do
-		diff "${REPO}/${file}" "${HOME}/${file}" || fail "~/${file} differs from the repo"
+		diff "${REPO}/config/${file}" "${HOME}/${file}" || fail "~/${file} differs from the repo"
 	done
 }
 
@@ -120,8 +120,8 @@ make_ff_profile() {
 
 # $1 profile folder: user.js and chrome/ must be there and identical to the repo
 assert_ff_installed() {
-	diff "${REPO}/firefox/user.js" "$1/user.js" || fail "$1/user.js differs from the repo"
-	diff -r "${REPO}/firefox/chrome" "$1/chrome" || fail "$1/chrome differs from the repo"
+	diff "${REPO}/config/firefox/user.js" "$1/user.js" || fail "$1/user.js differs from the repo"
+	diff -r "${REPO}/config/firefox/chrome" "$1/chrome" || fail "$1/chrome differs from the repo"
 }
 
 # $1 profile folder: nothing from the rice must be there
