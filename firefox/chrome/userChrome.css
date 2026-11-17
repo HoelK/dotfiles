@@ -1,0 +1,81 @@
+:root {
+    --toolbox-background-color: rgba(0, 0, 0, 0.25) !important;
+    --toolbox-background-color-inactive: rgba(0, 0, 0, 0.25) !important;
+    --toolbox-text-color: #eee !important;
+    --toolbox-text-color-inactive: #ccc !important;
+    --toolbar-background-color: transparent !important;
+    --toolbar-text-color: #eee !important;
+    --toolbar-field-background-color: rgba(255, 255, 255, 0.1) !important;
+    --toolbar-field-text-color: #eee !important;
+    --tabpanel-background-color: transparent !important;
+}
+:root, body, #browser, #tabbrowser-tabpanels {
+    background-color: transparent !important;
+}
+body {
+    background-color: var(--toolbox-background-color) !important;  /* single tint layer */
+}
+
+/* Frosted address bar and results while searching */
+:root {
+    --urlbar-background-color-focus: rgba(20, 20, 25, 0.75) !important;
+    --toolbar-field-background-color-focus: rgba(20, 20, 25, 0.75) !important;
+    --toolbar-field-text-color-focus: #eee !important;
+}
+.urlbar-background, .urlbarView-background {
+    backdrop-filter: blur(16px) !important;
+}
+
+/* Search engine switcher: button in the address bar */
+.searchmode-switcher {
+    --button-text-color-muted: #eee !important;
+    --button-text-color-muted-hover: #fff !important;
+    --button-text-color-muted-active: #fff !important;
+    --button-background-color-muted: rgba(255, 255, 255, 0.10) !important;
+    --button-background-color-muted-hover: rgba(255, 255, 255, 0.18) !important;
+    --button-background-color-muted-active: rgba(255, 255, 255, 0.25) !important;
+}
+
+/* Search engine switcher: the menu it opens */
+.searchmode-switcher-panel {
+    color-scheme: dark !important;
+    --panel-background-color: rgba(25, 25, 30, 0.90) !important;
+    --panel-text-color: #eee !important;
+    --panel-border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* Right-click and other menus */
+menupopup {
+    color-scheme: dark !important;
+    --panel-background-color: rgba(25, 25, 30, 0.80) !important;
+    --panel-text-color: #eee !important;
+    --panel-border-color: rgba(255, 255, 255, 0.12) !important;
+}
+menupopup :is(menuitem, menu)[_moz-menuactive]:not([disabled]) {
+    background-color: rgba(255, 255, 255, 0.12) !important;
+    color: #fff !important;
+}
+
+/* Panels: the main menu, extensions, downloads, the ••• menus, etc. */
+panel {
+    color-scheme: dark !important;
+    --panel-background-color: rgba(25, 25, 30, 0.80) !important;
+    --panel-text-color: #eee !important;
+    --panel-border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* Search results: quick action buttons and row hover */
+:root {
+    --urlbarview-background-color-hover: rgba(255, 255, 255, 0.10) !important;
+    --urlbarview-action-button-background-color: rgba(255, 255, 255, 0.08) !important;
+    --urlbarview-action-button-background-color-hover: rgba(255, 255, 255, 0.16) !important;
+}
+
+/* Address bar chips: "Firefox" on internal pages, "Not Secure", extension pages, search mode */
+:root {
+    --urlbar-box-background-color: rgba(255, 255, 255, 0.10) !important;
+    --urlbar-box-background-color-focus: rgba(255, 255, 255, 0.10) !important;
+    --urlbar-box-background-color-hover: rgba(255, 255, 255, 0.18) !important;
+    --urlbar-box-background-color-active: rgba(255, 255, 255, 0.25) !important;
+    --urlbar-box-text-color: #eee !important;
+}
