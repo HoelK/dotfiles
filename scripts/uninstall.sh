@@ -45,6 +45,7 @@ function remove_all {
 	remove_if_rice "${HOME}/.zshrc"
 	remove_if_rice "${share}wallpapers" "${repo_dir}/wallpapers"
 	ff_uninstall	# no backup folder here, so it only removes
+	otd_uninstall	# same
 }
 
 #######################
@@ -98,6 +99,28 @@ function ff_uninstall {
 	fi
 }
 
+##############################
+###### OPENTABLETDRIVER ######
+##############################
+
+function otd_uninstall {
+	local file dir
+
+	for file in "${OTD_FILES[@]}"; do
+		if remove_if_rice "${otd_dir}${file}" "${rice_dir}/OpenTabletDriver/${file}" &&
+			[[ -e "${backup_dir}OpenTabletDriver/${file}" ]]; then
+			mkdir -p "${otd_dir}"
+			run_and_log "Restoring ${backup_dir}OpenTabletDriver/${file} to ${otd_dir}" mv "${backup_dir}OpenTabletDriver/${file}" "${otd_dir}"
+		fi
+	done
+	# Leave no empty folder behind: in the backup, and the one install created
+	for dir in "${backup_dir}OpenTabletDriver" "${otd_dir}"; do
+		if [[ -d "${dir}" ]]; then
+			rmdir --ignore-fail-on-non-empty "${dir}"
+		fi
+	done
+}
+
 ######################
 ##### WALLPAPERS #####
 ######################
@@ -119,6 +142,7 @@ dirs_uninstall
 zsh_uninstall
 wallpaper_uninstall
 ff_uninstall
+otd_uninstall
 echo "${INFO} The old config folders have been moved from ${backup_dir} to ${config_dir}"
 
 clean_empty_backup ||

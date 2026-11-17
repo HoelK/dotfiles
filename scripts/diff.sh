@@ -114,6 +114,9 @@ for file in "${FILES[@]}"; do
 done
 check "${repo_dir}/wallpapers" "${share}wallpapers"
 check_firefox
+for file in "${OTD_FILES[@]}"; do
+	check "${rice_dir}/OpenTabletDriver/${file}" "${otd_dir}${file}"
+done
 
 echo
 if (( differ == 0 && missing == 0 )); then

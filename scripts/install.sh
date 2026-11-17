@@ -106,6 +106,31 @@ function ff_install {
 	done
 }
 
+##############################
+###### OPENTABLETDRIVER ######
+##############################
+
+# Only the files from the repo are replaced, the driver's logs and plugins stay
+function otd_install {
+	local file
+
+	mkdir -p "${otd_dir}" || {
+		echo "${FAIL} Couldn't create ${otd_dir}"
+		return 1
+	}
+	for file in "${OTD_FILES[@]}"; do
+		if [[ -e "${otd_dir}${file}" ]] &&
+			! backup "${otd_dir}${file}" "${rice_dir}/OpenTabletDriver/${file}" "${backup_dir}OpenTabletDriver/"; then
+			continue
+		fi
+		run_and_log "Installing ${rice_dir}/OpenTabletDriver/${file} to ${otd_dir}" cp "${rice_dir}/OpenTabletDriver/${file}" "${otd_dir}"
+	done
+
+	if command -v otd-daemon >/dev/null; then
+		echo "${INFO} OpenTabletDriver only reads its settings when it starts: systemctl --user restart opentabletdriver.service"
+	fi
+}
+
 ######################
 ##### WALLPAPERS #####
 ######################
@@ -129,6 +154,7 @@ dirs_install
 zsh_install
 wallpaper_install
 ff_install
+otd_install
 echo "${INFO} The new config folders have been moved to ${config_dir}"
 
 clean_empty_backup ||

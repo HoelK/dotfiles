@@ -76,7 +76,7 @@ CASE_CODES=()
 add_case() { CASE_NAMES+=("$1"); CASE_CODES+=("$2"); }
 
 add_case "scripts have no syntax error" '
-	for script in install.sh uninstall.sh diff.sh common.sh; do
+	for script in install.sh uninstall.sh diff.sh check.sh common.sh; do
 		bash -n "$REPO/scripts/$script" || fail "bash -n reports a syntax error in $script"
 	done
 '
@@ -329,6 +329,43 @@ add_case "firefox: uninstall after a fresh install removes only the rice" "$FF_I
 	[[ -f "$HOME/.mozilla/firefox/profiles.ini" ]] || fail "uninstall removed profiles.ini"
 '
 
+##############################
+###### OPENTABLETDRIVER ######
+##############################
+
+# The driver keeps its logs and plugins next to settings.json: only settings.json is the rice
+add_case "otd: installs settings.json and keeps the driver files" '
+	otd="$HOME/.config/OpenTabletDriver"
+	mkdir -p "$otd/Logs"
+	echo MY_LOG > "$otd/Logs/log.txt"
+	echo "{ \"OLD_OTD\": true }" > "$otd/settings.json"
+	install
+	diff "$REPO/config/OpenTabletDriver/settings.json" "$otd/settings.json" || fail "settings.json differs from the repo"
+	assert_backed_up OLD_OTD
+	grep -qs MY_LOG "$otd/Logs/log.txt" || fail "the driver logs were moved or removed"
+'
+
+add_case "otd: uninstall restores the old settings" '
+	otd="$HOME/.config/OpenTabletDriver"
+	mkdir -p "$otd/Logs"
+	echo MY_LOG > "$otd/Logs/log.txt"
+	echo "{ \"OLD_OTD\": true }" > "$otd/settings.json"
+	install
+	cmp -s "$REPO/config/OpenTabletDriver/settings.json" "$otd/settings.json" || fail "install did not put settings.json in place"
+	uninstall
+	grep -qs OLD_OTD "$otd/settings.json" || fail "old settings.json not restored"
+	grep -qs MY_LOG "$otd/Logs/log.txt" || fail "the driver logs were moved or removed"
+	leftover=$(find "$HOME/.config/$BACKUP_DIR" -mindepth 1 2>/dev/null)
+	[[ -z "$leftover" ]] || fail "backup folder not cleaned up after restoring everything: $leftover"
+'
+
+add_case "otd: uninstall after a fresh install removes the folder it created" '
+	install
+	[[ -f "$HOME/.config/OpenTabletDriver/settings.json" ]] || fail "install did not put settings.json in place"
+	uninstall
+	[[ ! -e "$HOME/.config/OpenTabletDriver" ]] || fail "~/.config/OpenTabletDriver still there: $(ls -A "$HOME/.config/OpenTabletDriver")"
+'
+
 ##################
 ###### DIFF ######
 ##################
@@ -386,6 +423,50 @@ add_case "diff: checks the Firefox profile" "$FF_INSTALL_GUARD"'
 	run_diff
 	grep -q "\[ DIFF \] ~/.mozilla/firefox/$FF_PROFILE/user.js" <<< "$DIFF_OUTPUT" || fail "edited user.js not reported"
 	grep -q "\[ SAME \] ~/.mozilla/firefox/$FF_PROFILE/chrome" <<< "$DIFF_OUTPUT" || fail "untouched chrome/ not reported as same"
+'
+
+add_case "diff: checks the OpenTabletDriver settings" '
+	install
+	echo "{}" > "$HOME/.config/OpenTabletDriver/settings.json"
+	run_diff
+	grep -q "\[ DIFF \] ~/.config/OpenTabletDriver/settings.json" <<< "$DIFF_OUTPUT" || fail "edited settings.json not reported"
+'
+
+###################
+###### CHECK ######
+###################
+
+add_case "check: passes when everything needed is installed" '
+	fake_programs $(required_programs)
+	fake_fonts
+	run_check
+	(( CHECK_STATUS == 0 )) || fail "check.sh exited with ${CHECK_STATUS}, expected 0"
+	grep -q "\[ OK \] kitty" <<< "$CHECK_OUTPUT" || fail "installed kitty not reported as OK"
+	grep -q "\[ OPTIONAL \] steam" <<< "$CHECK_OUTPUT" || fail "missing optional steam not reported"
+'
+
+add_case "check: reports a missing program" '
+	fake_programs $(required_programs | grep -vx hyprshot)
+	fake_fonts
+	run_check
+	(( CHECK_STATUS == 1 )) || fail "check.sh exited with ${CHECK_STATUS}, expected 1"
+	grep -q "\[ MISSING \] hyprshot" <<< "$CHECK_OUTPUT" || fail "missing hyprshot not reported"
+'
+
+add_case "check: reports missing fonts and icons" '
+	fake_programs $(required_programs)
+	fake_fonts none
+	run_check
+	(( CHECK_STATUS == 1 )) || fail "check.sh exited with ${CHECK_STATUS}, expected 1"
+	grep -q "\[ MISSING \] font Monocraft" <<< "$CHECK_OUTPUT" || fail "missing Monocraft not reported"
+	grep -q "\[ MISSING \] icon U+" <<< "$CHECK_OUTPUT" || fail "icons without a font not reported"
+'
+
+add_case "check: reports fontconfig missing" '
+	fake_programs $(required_programs)
+	run_check
+	(( CHECK_STATUS == 1 )) || fail "check.sh exited with ${CHECK_STATUS}, expected 1"
+	grep -q "\[ MISSING \] fc-list" <<< "$CHECK_OUTPUT" || fail "missing fc-list not reported"
 '
 
 ################

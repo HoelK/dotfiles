@@ -49,6 +49,56 @@ run_diff() {
 	fi
 }
 
+# check.sh runs with this folder as its only PATH, so its result
+# depends on the fake programs put in it, not on the machine.
+FAKE_BIN="${HOME}/fake-bin"
+
+# Puts in FAKE_BIN the basic tools check.sh needs and a fake version of each given program
+# $@ programs to fake
+fake_programs() {
+	local tool
+	mkdir -p "${FAKE_BIN}"
+	for tool in dirname realpath grep sort; do
+		ln -sf "$(command -v "${tool}")" "${FAKE_BIN}/${tool}"
+	done
+	for tool in "$@"; do
+		printf '#!/bin/sh\n' > "${FAKE_BIN}/${tool}"
+		chmod +x "${FAKE_BIN}/${tool}"
+	done
+}
+
+# Puts a fake fc-list in FAKE_BIN: it finds every font and icon, or none with "none"
+fake_fonts() {
+	mkdir -p "${FAKE_BIN}"
+	if [[ "${1:-}" == none ]]; then
+		printf '#!/bin/sh\n' > "${FAKE_BIN}/fc-list"
+	else
+		printf '#!/bin/sh\necho "Fake Font"\n' > "${FAKE_BIN}/fc-list"
+	fi
+	chmod +x "${FAKE_BIN}/fc-list"
+}
+
+# Prints the needed (not optional) programs listed in check.sh, one per line
+required_programs() {
+	sed -n '/^PROGRAMS=(/,/^)/s/^\t"\([^|]*\)|.*/\1/p' "${REPO}/scripts/check.sh"
+}
+
+# Run check.sh from /, with FAKE_BIN as PATH. It exits 1 when something is missing,
+# so instead of failing it saves its output (without colors) in CHECK_OUTPUT and
+# its exit code in CHECK_STATUS.
+# Fails only on an error (exit code 2+, or a command inside it printed an error).
+run_check() {
+	CHECK_OUTPUT=$(cd / && PATH="${FAKE_BIN}" "${REPO}/scripts/check.sh" "$@" 2>&1)
+	CHECK_STATUS=$?
+	CHECK_OUTPUT=$(sed 's/\x1b\[[0-9;]*m//g' <<< "${CHECK_OUTPUT}")
+	echo "${CHECK_OUTPUT}"
+	(( CHECK_STATUS <= 1 )) || fail "check.sh $* exited with code ${CHECK_STATUS}"
+	local errors='^(grep|sort|fc-list): |command not found|syntax error|unbound variable'
+	if grep -qE "${errors}" <<< "${CHECK_OUTPUT}"; then
+		fail "a command failed inside check.sh: $(grep -m1 -E "${errors}" <<< "${CHECK_OUTPUT}")"
+	fi
+}
+
 # Every config from the repo must be installed and identical
 assert_installed() {
 	local dir file

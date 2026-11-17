@@ -34,6 +34,11 @@ FF_FILES=(
 	"chrome"
 )
 
+# Files to apply in the OpenTabletDriver folder (it also holds the driver's logs and plugins)
+OTD_FILES=(
+	"settings.json"
+)
+
 # Config paths
 : ${HOME:?HOME env required}
 config_dir="${HOME}/.config/"
@@ -41,6 +46,7 @@ backup_dir="${config_dir}config-back/"
 repo_dir="$(dirname "$(dirname "$(realpath "${BASH_SOURCE[0]}")")")"
 rice_dir="${repo_dir}/config"
 share="${HOME}/.local/share/"
+otd_dir="${config_dir}OpenTabletDriver/"
 
 #############################
 ##### Environment setup #####

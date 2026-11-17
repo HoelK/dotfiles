@@ -53,7 +53,6 @@ hl.on("hyprland.start", function ()
   hl.exec_cmd(WPengine)
   hl.exec_cmd(statusbar)
   hl.exec_cmd(terminal)
-  hl.exec_cmd("gammastep -m wayland -b 0.6:0.6 -l 0:0")
 end)
 
 -------------------------------
@@ -183,6 +182,13 @@ hl.config({
 hl.device({
     name    = "mediatek-inc-razer-blackshark-v2-hs-2.4",
     enabled = false,
+})
+
+-- Wacom tablet, driven by OpenTabletDriver in relative mode: the pen is a mouse.
+-- Flat so its speed only depends on the OpenTabletDriver sensitivity.
+hl.device({
+	name			= "opentabletdriver-virtual-mouse",
+	accel_profile	= "flat",
 })
 
 ---------------------
