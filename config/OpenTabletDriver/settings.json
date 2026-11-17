@@ -63,7 +63,7 @@
             "Settings": [
               {
                 "Property": "Binding",
-                "Value": "Button 1"
+                "Value": "Button 2"
               }
             ],
             "Enable": true
@@ -73,7 +73,7 @@
             "Settings": [
               {
                 "Property": "Binding",
-                "Value": "Button 2"
+                "Value": "Button 1"
               }
             ],
             "Enable": true
