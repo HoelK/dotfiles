@@ -9,25 +9,30 @@ fail() {
 	exit 1
 }
 
-# Run install.sh from / so it can't rely on the current directory.
+# Run a script from scripts/, from / so it can't rely on the current directory.
 # Fails if it exits with an error, logged a FAIL line, or if a command
 # inside it printed an error (mv: cannot..., command not found...).
-install() {
-	local output status
-	output=$(cd / && "${REPO}/scripts/install.sh" "$@" 2>&1)
+# $1 script name, the rest are its arguments
+run_script() {
+	local script="$1" output status
+	shift
+	output=$(cd / && "${REPO}/scripts/${script}" "$@" 2>&1)
 	status=$?
 	echo "${output}"
-	(( status == 0 )) || fail "install.sh $* exited with code ${status}"
+	(( status == 0 )) || fail "${script} $* exited with code ${status}"
 	# Remove colors before searching the log
 	output=$(sed 's/\x1b\[[0-9;]*m//g' <<< "${output}")
 	if grep -q '\[ *FAIL *\]' <<< "${output}"; then
-		fail "install.sh logged: $(grep -m1 '\[ *FAIL *\]' <<< "${output}")"
+		fail "${script} logged: $(grep -m1 '\[ *FAIL *\]' <<< "${output}")"
 	fi
 	local errors='^(mv|cp|mkdir|ln|rm|ls|cat|xdg-user-dir): |command not found|syntax error|unbound variable'
 	if grep -qE "${errors}" <<< "${output}"; then
-		fail "a command failed inside install.sh: $(grep -m1 -E "${errors}" <<< "${output}")"
+		fail "a command failed inside ${script}: $(grep -m1 -E "${errors}" <<< "${output}")"
 	fi
 }
+
+install()	{ run_script install.sh "$@"; }
+uninstall()	{ run_script uninstall.sh "$@"; }
 
 # Every config from the repo must be installed and identical
 assert_installed() {
@@ -45,7 +50,7 @@ assert_backed_up() {
 	grep -rqs "$1" "${HOME}/.config/${BACKUP_DIR}" || fail "'$1' not found in ~/.config/${BACKUP_DIR}"
 }
 
-# install.sh must never modify the repo itself
+# The scripts must never modify the repo itself
 assert_repo_untouched() {
 	diff -r /src "${REPO}" || fail "the repo copy was modified"
 }

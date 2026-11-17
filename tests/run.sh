@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Tests install.sh inside throwaway Docker containers.
+# Tests install.sh and uninstall.sh inside throwaway Docker containers.
 #
 #   tests/run.sh               run every test case
 #   tests/run.sh backup        run only the cases whose name contains "backup"
@@ -20,7 +20,7 @@ set -u
 IMAGE="rice-test"
 REPO="$(dirname "$(realpath "$0")")/.."
 
-# Must match install.sh
+# Must match scripts/common.sh
 DIRECTORIES=(hypr tmux nvim kitty waybar wlogout)
 FILES=(.zshrc)
 BACKUP_DIR="config-back"	# inside ~/.config
@@ -75,8 +75,10 @@ CASE_NAMES=()
 CASE_CODES=()
 add_case() { CASE_NAMES+=("$1"); CASE_CODES+=("$2"); }
 
-add_case "script has no syntax error" '
-	bash -n "$REPO/scripts/install.sh" || fail "bash -n reports a syntax error"
+add_case "scripts have no syntax error" '
+	for script in install.sh uninstall.sh common.sh; do
+		bash -n "$REPO/scripts/$script" || fail "bash -n reports a syntax error in $script"
+	done
 '
 
 add_case "fresh install" '
@@ -125,19 +127,19 @@ add_case "each run gets its own backup folder" '
 '
 
 add_case "uninstall restores the old config" '
-	grep -q -- "--uninstall" "$REPO/scripts/install.sh" || { echo "--uninstall not implemented yet"; exit 77; }
+	[[ -x "$REPO/scripts/uninstall.sh" ]] || { echo "uninstall.sh not implemented yet"; exit 77; }
 	make_old_config
 	install
-	install --uninstall
+	uninstall
 	grep -qs OLD_HYPR "$HOME/.config/hypr/hyprland.conf" || fail "old hyprland.conf not restored"
 	grep -qs OLD_ZSHRC "$HOME/.zshrc" || fail "old .zshrc not restored"
 	assert_no_broken_links
 '
 
 add_case "uninstall after a fresh install removes the rice" '
-	grep -q -- "--uninstall" "$REPO/scripts/install.sh" || { echo "--uninstall not implemented yet"; exit 77; }
+	[[ -x "$REPO/scripts/uninstall.sh" ]] || { echo "uninstall.sh not implemented yet"; exit 77; }
 	install
-	install --uninstall
+	uninstall
 	for dir in "${DIRECTORIES[@]}"; do
 		[[ ! -e "$HOME/.config/$dir" ]] || fail "~/.config/$dir still installed (no backup existed, so it should be removed)"
 	done
@@ -146,52 +148,52 @@ add_case "uninstall after a fresh install removes the rice" '
 '
 
 add_case "install twice, uninstall restores the original config" '
-	grep -q -- "--uninstall" "$REPO/scripts/install.sh" || { echo "--uninstall not implemented yet"; exit 77; }
+	[[ -x "$REPO/scripts/uninstall.sh" ]] || { echo "uninstall.sh not implemented yet"; exit 77; }
 	make_old_config
 	install
 	install
-	install --uninstall
+	uninstall
 	grep -qs OLD_HYPR "$HOME/.config/hypr/hyprland.conf" || fail "~/.config/hypr is not the original config: $(head -c 80 "$HOME/.config/hypr/hyprland.conf")"
 	grep -qs OLD_ZSHRC "$HOME/.zshrc" || fail "~/.zshrc is not the original one"
 '
 
 add_case "existing wallpapers are backed up and restored" '
-	grep -q -- "--uninstall" "$REPO/scripts/install.sh" || { echo "--uninstall not implemented yet"; exit 77; }
+	[[ -x "$REPO/scripts/uninstall.sh" ]] || { echo "uninstall.sh not implemented yet"; exit 77; }
 	mkdir -p "$HOME/$WALLPAPERS_DIR"
 	echo MY_WALLPAPER > "$HOME/$WALLPAPERS_DIR/mine.png"
 	install
 	assert_backed_up MY_WALLPAPER
 	assert_wallpapers_installed	# also fails if mine.png was left mixed with the rice ones
-	install --uninstall
+	uninstall
 	grep -qs MY_WALLPAPER "$HOME/$WALLPAPERS_DIR/mine.png" || fail "user wallpaper not restored"
 	[[ ! -e "$HOME/$WALLPAPERS_DIR/Oneshot1.png" ]] || fail "rice wallpapers still there after uninstall"
 '
 
 add_case "uninstall twice keeps the user config" '
-	grep -q -- "--uninstall" "$REPO/scripts/install.sh" || { echo "--uninstall not implemented yet"; exit 77; }
+	[[ -x "$REPO/scripts/uninstall.sh" ]] || { echo "uninstall.sh not implemented yet"; exit 77; }
 	make_old_config
 	install
-	install --uninstall
-	install --uninstall	# by mistake
+	uninstall
+	uninstall	# by mistake
 	grep -qs OLD_HYPR "$HOME/.config/hypr/hyprland.conf" || fail "user hyprland.conf deleted by the 2nd uninstall"
 	grep -qs OLD_ZSHRC "$HOME/.zshrc" || fail "user .zshrc deleted by the 2nd uninstall"
 '
 
 add_case "uninstall without install keeps the user config" '
-	grep -q -- "--uninstall" "$REPO/scripts/install.sh" || { echo "--uninstall not implemented yet"; exit 77; }
+	[[ -x "$REPO/scripts/uninstall.sh" ]] || { echo "uninstall.sh not implemented yet"; exit 77; }
 	make_old_config
-	install --uninstall	# rice was never installed
+	uninstall	# rice was never installed
 	grep -qs OLD_HYPR "$HOME/.config/hypr/hyprland.conf" || fail "user hyprland.conf deleted"
 	grep -qs OLD_ZSHRC "$HOME/.zshrc" || fail "user .zshrc deleted"
 '
 
 add_case "uninstall after editing the rice loses nothing" '
-	grep -q -- "--uninstall" "$REPO/scripts/install.sh" || { echo "--uninstall not implemented yet"; exit 77; }
+	[[ -x "$REPO/scripts/uninstall.sh" ]] || { echo "uninstall.sh not implemented yet"; exit 77; }
 	make_old_config
 	install
 	echo "# my tweak" >> "$HOME/.config/hypr/hyprland.conf"	# user edits the installed rice
 	echo "# my alias" >> "$HOME/.zshrc"
-	install --uninstall
+	uninstall
 	[[ ! -e "$HOME/.config/hypr/hypr" ]] || fail "backup restored INSIDE the edited config: ~/.config/hypr/hypr"
 	grep -qs "my tweak" "$HOME/.config/hypr/hyprland.conf" || fail "user edit in hyprland.conf lost"
 	grep -qs "my alias" "$HOME/.zshrc" || fail "user edit in .zshrc lost (overwritten by the backup)"
@@ -223,10 +225,10 @@ add_case "no broken symlinks after install" '
 ###### FIREFOX ######
 #####################
 
-# Skip the Firefox cases until install.sh actually calls the functions
+# Skip the Firefox cases until the scripts actually call the functions
 FF_INSTALL_GUARD='grep -qE "^[[:space:]]*ff_install[[:space:]]*$" "$REPO/scripts/install.sh" || { echo "ff_install not called yet"; exit 77; }
 '
-FF_UNINSTALL_GUARD='grep -qE "^[[:space:]]*ff_uninstall[[:space:]]*$" "$REPO/scripts/install.sh" || { echo "ff_uninstall not called yet"; exit 77; }
+FF_UNINSTALL_GUARD='grep -qE "^[[:space:]]*ff_uninstall[[:space:]]*$" "$REPO/scripts/uninstall.sh" || { echo "ff_uninstall not called yet"; exit 77; }
 '
 
 add_case "firefox: no profile, install skips it without failing" "$FF_INSTALL_GUARD"'
@@ -309,7 +311,7 @@ add_case "firefox: uninstall restores the old user.js and chrome" "$FF_INSTALL_G
 	mkdir "$p/chrome"
 	echo "/* OLD_CHROME */" > "$p/chrome/userChrome.css"
 	install
-	install --uninstall
+	uninstall
 	grep -qs OLD_USERJS "$p/user.js" || fail "old user.js not restored"
 	grep -qs OLD_CHROME "$p/chrome/userChrome.css" || fail "old chrome/userChrome.css not restored"
 	[[ ! -e "$p/chrome/chrome" ]] || fail "backup restored INSIDE chrome/: chrome/chrome"
@@ -321,7 +323,7 @@ add_case "firefox: uninstall after a fresh install removes only the rice" "$FF_I
 	p="$HOME/.mozilla/firefox/$FF_PROFILE"
 	make_ff_profile "$HOME/.mozilla/firefox"
 	install
-	install --uninstall
+	uninstall
 	assert_ff_not_installed "$p"
 	grep -qs browser.startup.page "$p/prefs.js" || fail "uninstall touched prefs.js"
 	[[ -f "$HOME/.mozilla/firefox/profiles.ini" ]] || fail "uninstall removed profiles.ini"
