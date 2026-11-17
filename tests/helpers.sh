@@ -34,6 +34,21 @@ run_script() {
 install()	{ run_script install.sh "$@"; }
 uninstall()	{ run_script uninstall.sh "$@"; }
 
+# Run diff.sh from /. It exits 1 when something differs, so instead of failing
+# it saves its output (without colors) in DIFF_OUTPUT and its exit code in DIFF_STATUS.
+# Fails only on an error (exit code 2+, or a command inside it printed an error).
+run_diff() {
+	DIFF_OUTPUT=$(cd / && "${REPO}/scripts/diff.sh" "$@" 2>&1)
+	DIFF_STATUS=$?
+	DIFF_OUTPUT=$(sed 's/\x1b\[[0-9;]*m//g' <<< "${DIFF_OUTPUT}")
+	echo "${DIFF_OUTPUT}"
+	(( DIFF_STATUS <= 1 )) || fail "diff.sh $* exited with code ${DIFF_STATUS}"
+	local errors='^(find|cmp|diff|sed): |command not found|syntax error|unbound variable'
+	if grep -qE "${errors}" <<< "${DIFF_OUTPUT}"; then
+		fail "a command failed inside diff.sh: $(grep -m1 -E "${errors}" <<< "${DIFF_OUTPUT}")"
+	fi
+}
+
 # Every config from the repo must be installed and identical
 assert_installed() {
 	local dir file

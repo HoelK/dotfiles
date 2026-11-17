@@ -76,7 +76,7 @@ CASE_CODES=()
 add_case() { CASE_NAMES+=("$1"); CASE_CODES+=("$2"); }
 
 add_case "scripts have no syntax error" '
-	for script in install.sh uninstall.sh common.sh; do
+	for script in install.sh uninstall.sh diff.sh common.sh; do
 		bash -n "$REPO/scripts/$script" || fail "bash -n reports a syntax error in $script"
 	done
 '
@@ -327,6 +327,65 @@ add_case "firefox: uninstall after a fresh install removes only the rice" "$FF_I
 	assert_ff_not_installed "$p"
 	grep -qs browser.startup.page "$p/prefs.js" || fail "uninstall touched prefs.js"
 	[[ -f "$HOME/.mozilla/firefox/profiles.ini" ]] || fail "uninstall removed profiles.ini"
+'
+
+##################
+###### DIFF ######
+##################
+
+add_case "diff: fresh install matches the repo" '
+	install
+	run_diff
+	(( DIFF_STATUS == 0 )) || fail "diff.sh exited with ${DIFF_STATUS} right after installing"
+	! grep -qE "\[ (DIFF|MISSING) \]" <<< "$DIFF_OUTPUT" || fail "diff.sh reports a difference right after installing"
+'
+
+add_case "diff: reports what is not installed" '
+	run_diff
+	(( DIFF_STATUS == 1 )) || fail "diff.sh exited with ${DIFF_STATUS}, expected 1"
+	grep -q "\[ MISSING \] ~/.config/hypr" <<< "$DIFF_OUTPUT" || fail "missing ~/.config/hypr not reported"
+	grep -q "\[ MISSING \] ~/.zshrc" <<< "$DIFF_OUTPUT" || fail "missing ~/.zshrc not reported"
+'
+
+add_case "diff: reports edited, added and removed files" '
+	install
+	echo "# my tweak" >> "$HOME/.config/hypr/hyprland.conf"
+	echo extra > "$HOME/.config/hypr/mine.conf"
+	rm "$HOME/.config/kitty/kitty.conf"
+	run_diff
+	(( DIFF_STATUS == 1 )) || fail "diff.sh exited with ${DIFF_STATUS}, expected 1"
+	grep -qE "modified +hyprland.conf" <<< "$DIFF_OUTPUT" || fail "edited hyprland.conf not reported"
+	grep -qE "only installed +mine.conf" <<< "$DIFF_OUTPUT" || fail "added mine.conf not reported"
+	grep -qE "only in repo +kitty.conf" <<< "$DIFF_OUTPUT" || fail "removed kitty.conf not reported"
+	grep -q "\[ SAME \] ~/.config/tmux" <<< "$DIFF_OUTPUT" || fail "untouched ~/.config/tmux not reported as same"
+'
+
+add_case "diff: --full shows the changed lines" '
+	install
+	echo "# my tweak" >> "$HOME/.config/hypr/hyprland.conf"
+	run_diff --full
+	grep -q "^+# my tweak" <<< "$DIFF_OUTPUT" || fail "added line not in the full diff"
+'
+
+add_case "diff: never changes a file" '
+	make_old_config
+	install
+	echo "# my tweak" >> "$HOME/.config/hypr/hyprland.conf"
+	before=$(find "$HOME" -printf "%p %s %T@\n" | sort)
+	run_diff >/dev/null
+	run_diff --full >/dev/null
+	after=$(find "$HOME" -printf "%p %s %T@\n" | sort)
+	[[ "$before" == "$after" ]] || fail "diff.sh changed files: $(diff <(echo "$before") <(echo "$after") | head -5)"
+'
+
+add_case "diff: checks the Firefox profile" "$FF_INSTALL_GUARD"'
+	p="$HOME/.mozilla/firefox/$FF_PROFILE"
+	make_ff_profile "$HOME/.mozilla/firefox"
+	install
+	echo "// my pref" >> "$p/user.js"
+	run_diff
+	grep -q "\[ DIFF \] ~/.mozilla/firefox/$FF_PROFILE/user.js" <<< "$DIFF_OUTPUT" || fail "edited user.js not reported"
+	grep -q "\[ SAME \] ~/.mozilla/firefox/$FF_PROFILE/chrome" <<< "$DIFF_OUTPUT" || fail "untouched chrome/ not reported as same"
 '
 
 ################
