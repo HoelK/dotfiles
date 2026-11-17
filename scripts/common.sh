@@ -20,6 +20,7 @@ DIRECTORIES=(
 	"kitty"
 	"waybar"
 	"wlogout"
+	"fuzzel"
 )
 
 # Files to apply

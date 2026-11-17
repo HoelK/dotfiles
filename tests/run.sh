@@ -21,7 +21,7 @@ IMAGE="rice-test"
 REPO="$(dirname "$(realpath "$0")")/.."
 
 # Must match scripts/common.sh
-DIRECTORIES=(hypr tmux nvim kitty waybar wlogout)
+DIRECTORIES=(hypr tmux nvim kitty waybar wlogout fuzzel)
 FILES=(.zshrc)
 BACKUP_DIR="config-back"	# inside ~/.config
 WALLPAPERS_DIR=".local/share/wallpapers"	# inside ~
