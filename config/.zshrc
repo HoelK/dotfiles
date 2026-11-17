@@ -23,7 +23,6 @@ alias c3="~/c3/c3c compile"
 
 ##Envs
 export PATH=$PATH:$HOME/.venv/bin
-source "$HOME/.local/bin/env"
 
 ##keymaps
 bindkey '^[[1;5D' backward-word

@@ -15,7 +15,7 @@ o.number			= true
 
 --Keymaps
 o.mouse = ""
-k.set('i', '<tab>', '<C-n>')
+k.set('i', '<S-tab>', '<C-n>')
 k.set('n', '<Leader>d', '<cmd>Explore<CR>')
 
 -----------PLUGINS-----------
